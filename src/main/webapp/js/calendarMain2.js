@@ -204,15 +204,80 @@ var Calendar = {
 	
 	getFeedCode: function(feed) {
 		//수정 부분
-	    var clickCode = feed.TODO_CODE;
-	    var str = "<div style='display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #ddd;' onclick='Board.handleRowClick(\"" + clickCode + "\")'>";
-	    str += "<div style='width: 100px; text-align: center;'>" + feed.TODO_CODE + "</div>";
-		str += "<div style='width: 150px; text-align: center;'>" + feed.TODO_CONTENT + "</div>";
-	    str += "<div style='width: 150px; text-align: center;'>" + feed.TODO_WRITER + "</div>";
-	    
-	    str += "</div>";
+	    var clickCode = feed.TODO_CODE; //이게 식별자 id랑 같은 역할
+		var content = feed.TODO_CONTENT; //내용
+		var writer = feed.TODO_WRITER; //작성자
+		var isDone = feed.IS_DONE ? "done" : ""; //완료 여부 확인 추가해야함
+		
+		var str = `<div class="todo-item ${isDone}" id="todo-${clickCode}">`;
+			str += `<span class="todo-writer" id="todo-writer-${clickCode}">[${writer}]</span> `;
+		   str += `<span class="todo-text" id="todo-text-${clickCode}" onclick="toggleExpand(${clickCode})">${content}</span>`;
+		   str += `<div>`;
+		   str += `<button onclick="toggleTodo(${clickCode})"><i class="fa-solid ${isDone ? 'fa-rotate-left' : 'fa-check'}"></i></button>`;
+		   str += `<button onclick="editTodo(${clickCode})"><i class="fa-solid fa-pen"></i></button>`;
+		   str += `<button onclick="deleteTodo(${clickCode})"><i class="fa-solid fa-trash-can"></i></button>`;
+		   str += `</div>`;
+		   str += `</div>`;
+		   
+		   //toggleTodo는 완료 여부 판단 함수
+		   //editTodo는 수정 함수 
+		   //deleteTodo는 삭제 함수
+		   //toggleExpand는 긴 내용 ...으로 더보기 기능 구현한 함수
 
-	    return str;
+		   /* function toggleExpand(id) {
+		       const todoText = document.getElementById(`todo-text-${id}`); // 특정 id를 가진 요소 찾기
+		       if (!todoText) return; // 요소가 없으면 함수 종료
+
+		       if (todoText.classList.contains("expanded")) {
+		         todoText.classList.remove("expanded"); // 축소
+		       } else {
+		         todoText.classList.add("expanded"); // 펼치기
+		       }
+		     }
+			 
+			 function toggleTodo(id) {
+			     todoList = todoList.map((todo) =>
+			       todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
+			     );
+			     renderTodoList(); //사용자가 클릭한 항목에서 id를 비교해서 배열에서 해당 항목을 찾고
+			     //체크 버튼을 누르냐, 로테이션 버튼을 누르냐에 따라 isDone 값이 바뀜
+			   }
+			   // 할 일 삭제 함수
+			   function deleteTodo(id) {
+			     todoList = todoList.filter((todo) => todo.id !== id);
+			     renderTodoList(); //마찬가지로 클릭한 항목에서 id를 비교해서 배열에서 해당 항목을 찾고 filter 함수로 새로운 배열 반환
+			   }
+
+			   // 할 일 수정 함수
+			   function editTodo(id) {
+			     const todoItem = todoList.find((todo) => todo.id === id);
+			     if (!todoItem) return;
+
+			     // 기존 span을 input으로 변경
+			     const todoTextElement = document.getElementById(`todo-text-${id}`);
+			     todoTextElement.outerHTML = `<input class = "input_style" type="text" id="edit-${id}" value="${todoItem.content}" 
+			     onkeypress="updateTodo(event, ${id})"/>`;
+
+			     // 자동 포커스
+			     setTimeout(() => {
+			       document.getElementById(`edit-${id}`).focus();
+			     }, 100);
+			   }
+
+			   //수정 내용 저장 함수
+			   function updateTodo(event, id) {
+			     if (event.key === "Enter") {
+			       //엔터 키 누르면 저장되도록
+			       const updatedContent = event.target.value;
+			       todoList = todoList.map((todo) =>
+			         todo.id === id ? { ...todo, content: updatedContent } : todo
+			       );
+			       renderTodoList();
+			     }
+			   }
+*/
+
+		   return str;
 	},
 	
 };

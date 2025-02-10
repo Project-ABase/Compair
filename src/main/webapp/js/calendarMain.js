@@ -42,10 +42,23 @@ var CalendarTest = {
     },
 
     // 날짜 클릭 시 호출되는 함수
-    handleDateClick: function(date) {
-        alert("선택한 날짜: " + date);
-        Calendar.selectDate(date);
-    },
+	handleDateClick: function(date) {
+	    console.log("선택한 날짜:", date);
+	    alert(`선택한 날짜: ${date}`);
+
+	    
+	    let prevSelected = document.querySelectorAll(".selected");
+	    prevSelected.forEach(el => el.classList.remove("selected"));
+
+	 
+	    let newSelected = document.querySelector(`[data-date="${date}"]`);
+	    if (newSelected) {
+	        newSelected.classList.add("selected");
+	    }
+
+	    // 기존 로직 유지
+	    CalendarTest.selectDate(date);
+	},
 
     // 선택한 날짜에 해당하는 데이터를 서버로부터 가져온 후 캘린더 TODO 목록 출력
     selectDate: function(date) {
@@ -102,40 +115,47 @@ var CalendarTest = {
     },
 
     // 캘린더의 날짜들을 생성하여 화면에 출력
-    generateCalendar: function(date) {
-        var monthYear = document.getElementById("calendarMonthYear");
-        var calendarBody = document.getElementById("calendarBody");
+	generateCalendar: function(date) {
+	    var monthYear = document.getElementById("calendarMonthYear");
+	    var calendarBody = document.getElementById("calendarBody");
 
-        monthYear.textContent = date.getFullYear() + "년 " + (date.getMonth() + 1) + "월";
-        calendarBody.innerHTML = "";
+	    monthYear.textContent = date.getFullYear() + "년 " + (date.getMonth() + 1) + "월";
+	    calendarBody.innerHTML = "";
 
-        var firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-        var lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+	    var firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+	    var lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 
-        var row = "<tr>";
+	    var today = new Date();  // 현재 날짜 가져오기
+	    let row = "<tr>";
 
-        // 첫 주의 빈 칸 채우기
-        for (var i = 0; i < firstDay; i++) {
-            row += "<td></td>";
-        }
+	    // 첫 주의 빈 칸 채우기
+	    for (var i = 0; i < firstDay; i++) {
+	        row += "<td></td>";
+	    }
 
-        // 날짜 채우기
-        for (var day = 1; day <= lastDate; day++) {
-            if ((firstDay + day - 1) % 7 === 0 && day !== 1) {
-                row += "</tr><tr>";
-            }
+	    // 날짜 채우기
+	    for (var day = 1; day <= lastDate; day++) {
+	        if ((firstDay + day - 1) % 7 === 0 && day !== 1) {
+	            row += "</tr><tr>";
+	        }
 
-            var fullDate = date.getFullYear() + "-" + 
-                           String(date.getMonth() + 1).padStart(2, "0") + "-" + 
-                           String(day).padStart(2, "0");
-            console.log("fullDate " + fullDate);
+	        var fullDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+	            .toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 
-            // 날짜 클릭 시 Calendar.handleDateClick 호출
-            row += "<td class='calendar-day' data-date='" + fullDate + 
-                   "' onclick=\"Calendar.handleDateClick('" + fullDate + "')\">" + day + "</td>";
-        }
+	        let classList = "calendar-day";
 
-        row += "</tr>";
-        calendarBody.innerHTML = row;
-    }
+	        //오늘 날짜 표시
+	        if (today.getFullYear() === date.getFullYear() &&
+	            today.getMonth() === date.getMonth() &&
+	            today.getDate() === day) {
+	            classList += "today";
+	        }
+
+	        row += `<td class="${classList}" data-date="${fullDate}" onclick="CalendarTest.handleDateClick('${fullDate}')">${day}</td>`;
+	    }
+
+	    row += "</tr>";
+	    calendarBody.innerHTML = row;
+	}
+
 };

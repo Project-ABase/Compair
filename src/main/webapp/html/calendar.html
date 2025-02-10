@@ -1,36 +1,35 @@
 <div id="calendar-page">
-	<div class="calendar-header">
-		<button id="prevMonth" class="calendar-nav">&lt;</button>
-		<span id="calendarMonthYear"></span>
-		<button id="nextMonth" class="calendar-nav">&gt;</button>
-	</div>
-	<table class="calendar-table">
-		<thead>
-			<tr>
-				<th>일</th>
-				<th>월</th>
-				<th>화</th>
-				<th>수</th>
-				<th>목</th>
-				<th>금</th>
-				<th>토</th>
-			</tr>
-		</thead>
-		<tbody id="calendarBody"></tbody>
-	</table>
+  <div class="calendar-header">
+    <button id="prevMonth" class="calendar-nav">&lt;</button>
+    <span id="calendarMonthYear"></span>
+    <button id="nextMonth" class="calendar-nav">&gt;</button>
+  </div>
+  <table class="calendar-table">
+    <thead>
+      <tr>
+        <th>일</th>
+        <th>월</th>
+        <th>화</th>
+        <th>수</th>
+        <th>목</th>
+        <th>금</th>
+        <th>토</th>
+      </tr>
+    </thead>
+    <tbody id="calendarBody"></tbody>
+  </table>
 </div>
 <!--투두리스트-->
 <div id="todo-list-section">
-	<h2>To-Do 리스트</h2>
-	<div class="todo-input-area">
-		<input type="text" id="todo-input" placeholder="할 일을 입력하세요" />
-		<button id="add-todo-button">+</button>
-	</div>
-	<div id="todo-list"><!-- 여기에 추가 -->
-		<!-- 할 일 목록이 여기에 추가 -->
-	</div>
+  <h2>To-Do 리스트</h2>
+  <div class="todo-input-area">
+    <input type="text" id="todo-input" placeholder="할 일을 입력하세요" />
+    <button id="add-todo-button">+</button>
+  </div>
+  <div id="todo-list">
+    <!-- 할 일 목록이 여기에 추가 -->
+  </div>
 </div>
-<!--투두리스트 -->
 
 <link rel="stylesheet" href="/css/calendar.css" />
 
@@ -89,8 +88,26 @@
         .padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
       cell.setAttribute("data-date", fullDate);
 
+      // 오늘 날짜 표시
+      const today = new Date();
+      if (
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear() &&
+        day === today.getDate()
+      ) {
+        cell.classList.add("today");
+      }
+
       // 클릭 시 날짜 정보 출력
       cell.addEventListener("click", function () {
+        // 기존 선택된 날짜 스타일 초기화
+        const prevSelected = document.querySelector(".selected");
+        if (prevSelected) {
+          prevSelected.classList.remove("selected");
+        }
+
+        cell.classList.add("selected");
+
         handleDateClick(fullDate);
       });
 
