@@ -87,6 +87,7 @@
 	<script>
 		AllSession.lastSession(AllSession.serverGet());
 		AllSession.lastmax(AllSession.maxGet());
+	    //
 	    AllSession.init();
 	    AllSession.maxSession(3);
     	AllSession.pageSession('board');
@@ -155,13 +156,14 @@
 		}
 		
 		function user() {
+			AllSession.pageSession('user');
 			$("#todo-show-section").hide();
 			$("#mail-list-container").empty();
 			$("#todo-title").hide();
 			$("#buttonList").hide(); 	
 			$("#list").hide();
 			$("#calendarList").hide();
-			var params = {"uid": AllSession.uidGet()};
+			var params = {"uid": AllSession.uidGet(), "serverCode": AllSession.serverGet()};
 		    AJAX.call("../JSP/user.jsp", params, function(response) {
 		        //정보가 바뀌면 세션 정보 수정
 		    	if (response) {
