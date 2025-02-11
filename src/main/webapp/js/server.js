@@ -51,7 +51,6 @@ var Server = {
 	serverClick: function(sc) {
 		//서버 바뀔때는 초기화
 		AllSession.maxSession(3);
-		AllSession.minSession(-1);
 		AllSession.serverSession(sc);
 		
 		$("#list").empty();
@@ -70,7 +69,7 @@ var Server = {
 			else if(nowScreen == 'email'){
 				loadMailList();
 			}
-			else if(noewScreen == 'user'){
+			else if(nowScreen == 'user'){
 				$("#todo-title").hide();
 				$("#buttonList").hide(); 	
 				$("#list").hide();

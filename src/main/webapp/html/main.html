@@ -83,11 +83,11 @@
 	<script src="../js/main2.js"></script>
 	<script src="../js/allSession.js"></script>
 	<script src="../js/server.js"></script>
+	<script src="../js/calendarShow.js"></script>
 	<script src="../js/calendarMain2.js"></script>
 	<script src="../js/core.js"></script>
 	<script src="../js/mail.js"></script>
 	<script src="../js/todoShow.js"></script>
-	<script src="../js/calendarShow.js"></script>
 	<script src="https://unpkg.com/@yaireo/tagify"></script>
 	<script>
 		
@@ -101,19 +101,19 @@
 	
 		//board에 2번씩 출력 오류 
 		function board() {
-			$("#todo-show-section").hide();
+			$("#todo-show-section").empty();
 			$("#mail-list-container").empty();
 			$('#userInfo').empty();
-			$("#todo-title").hide();
-			$("#calendarList").hide();
+			$("#todo-title").empty();
+			$("#calendarList").empty();
 			$("#buttonList").show();
-			$("#todo-list-section").hide();
+			$("#todo-list-section").empty();
 			AllSession.pageSession('board');
-			$("#list").empty();
 			Board.boardShow();
 		}
 		
 		function calendar() {
+			/*
 			$("#todo-show-section").hide();
 			$("#mail-list-container").empty();
 			$('#userInfo').empty();
@@ -122,45 +122,56 @@
 			$("#list").hide();
 			$("#buttonList").hide();
 			$("todo-list-section").show();
-			AllSession.pageSession('calendar');
-			Calendar.init();
-		}
-		
-		function todo(){
-			$("#todo-show-section").show();
+			*/
+			$("#list").empty();
 			$("#todo-show-section").empty();
 			$("#mail-list-container").empty();
 			$('#userInfo').empty();
-			$("#todo-title").hide();
-			$("#calendarList").hide();
-			$("#list").hide();
+			$("#todo-title").empty();
+			$("#calendarList").empty();
 			$("#buttonList").hide();
-			$("#todo-list-section").hide();
+			$("#todo-list-section").empty();
+			AllSession.pageSession('calendar');
+			CalendarShow.calendar();
+			Calendar.todoShow();
+		}
+		
+		function todo(){
+			$("#list").empty();
+			$("#todo-show-section").empty();
+			$("#mail-list-container").empty();
+			$('#userInfo').empty();
+			$("#todo-title").empty();
+			$("#calendarList").empty();
+			$("#buttonList").hide();
+			$("#todo-list-section").empty();
 			AllSession.pageSession('todo');
 			Todo.init();
 		}
 	
 		function email(){
-			$("#todo-show-section").hide();
+			$("#list").empty();
+			$("#todo-show-section").empty();
 			$("#mail-list-container").empty();
 			$('#userInfo').empty();
-			$("#todo-title").hide();
-			$("#calendarList").hide();
-			$("#list").hide();
+			$("#todo-title").empty();
+			$("#calendarList").empty();
 			$("#buttonList").hide();
-			$("todo-list-section").hide();
+			$("#todo-list-section").empty();
 			AllSession.pageSession('email');
 			loadMailList(AllSession.uidGet());
 		}
 		
 		function user() {
 			AllSession.pageSession('user');
-			$("#todo-show-section").hide();
+			$("#list").empty();
+			$("#todo-show-section").empty();
 			$("#mail-list-container").empty();
-			$("#todo-title").hide();
-			$("#buttonList").hide(); 	
-			$("#list").hide();
-			$("#calendarList").hide();
+			$('#userInfo').empty();
+			$("#todo-title").empty();
+			$("#calendarList").empty();
+			$("#buttonList").hide();
+			$("#todo-list-section").empty();
 			var params = {"uid": AllSession.uidGet(), "serverCode": AllSession.serverGet()};
 		    AJAX.call("../JSP/user.jsp", params, function(response) {
 		        //정보가 바뀌면 세션 정보 수정
