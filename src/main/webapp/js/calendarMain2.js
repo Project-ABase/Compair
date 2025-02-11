@@ -71,8 +71,8 @@
 	    var content = feed.TODO_CONTENT; // 할 일 내용
 	    var writer = feed.TODO_WRITER; // 작성자
 		var tag = feed.TODO_TAGS;
-	    var isDone; //추가 필요
-		if(feed.CHECK == 1) isDone = true;
+	    var isDone = feed.TODO_CHECK; //추가 필요
+		//if(feed.CHECK == 1) isDone = true;
 	    var str = `<div class="todo-item ${isDone}" id="todo-${clickCode}">`;
 	   	str += `<span class="todo-writer" id="todo-writer-${clickCode}">[${writer}]</span>`;
 		str += `<span class="todo-text" id="todo-text-${clickCode}" onclick="toggleExpand(${clickCode})">${content}</span>`;
@@ -128,7 +128,15 @@
 	            toggleButtonIcon.classList.add("fa-rotate-left");
 	        }
 	    }
-		
+		alert(AllSession.uidGet());
+		var params ={"ServerCode":AllSession.serverGet(), "todoCode":id, "writer":AllSession.uidGet()};
+		AJAX.call("../JSP/todoUpdate.jsp", params, function(data) {
+		    if (data.trim() === "OK") {
+				alert("업데이트 성공");
+		    } else {
+		        alert("네트워크 에러가 발생되었습니다.!!");
+		    }
+		});
 	},
 
 	

@@ -237,6 +237,7 @@ public class TodoDAO {
                obj.put("TODO_CHECK", rs.getString("TODO_CHECK"));
                obj.put("TODO_CONTENT", rs.getString("TODO_CONTENT"));
                obj.put("TODO_TAGS", rs.getString("TAG"));
+               obj.put("TODO_CHECK", rs.getString("TODO_CHECK"));
                jsonArray.add(obj);
            }
            System.out.println(jsonArray.toString());
@@ -249,28 +250,40 @@ public class TodoDAO {
    }
    
    
-   public boolean todoCheck(int todoCode, int serverCode, String userId) throws SQLException {
-      Connection conn = null;
-      PreparedStatement stmt = null;
-      try {
-         String sql = "UPDATE TODOLIST SET TODO_CHECK = 1 - TODO_CHECK " + "WHERE TODO_CODE = ? AND SERVER_CODE = ? "
-               + "AND INSTR(TAG, ?) > 0"; // 태그된 사용자만 체크 가능
+   public String todoCheck(String todoCode, String serverCode, String userId) throws SQLException {
+	    Connection conn = null;
+	    PreparedStatement stmt = null;
+	    try {
+	        // 작성자이거나 TAG에 userId가 포함되어 있으면 업데이트(체크 토글)한다.
+	    	String sql = "UPDATE TODOLIST SET TODO_CHECK = 1 - TODO_CHECK ";
+	               sql += "WHERE TODO_CODE = ? AND SERVER_CODE = ? ";
+	               sql +=  "AND (TODO_WRITER = ? OR INSTR(TAG, ?) > 0)";
+	        int tc = Integer.parseInt(todoCode);
+	        int sc = Integer.parseInt(serverCode);
+	        System.out.println("TodoDao");
+	        System.out.println(todoCode);
+	        System.out.println(serverCode);
+	        System.out.println(userId);
+	        conn = conpool.get();
+	        stmt = conn.prepareStatement(sql);
+	        stmt.setInt(1, tc);
+	        stmt.setInt(2, sc);
+	        stmt.setString(3, userId);  // 작성자인 경우
+	        stmt.setString(4, userId);  // TAG에 userId가 포함되어 있는지 검사
+	        System.out.println(userId);
+	        System.out.println("Executing SQL: " + sql);
+	        int count = stmt.executeUpdate();
+	        System.out.println("count는 "+ count);
+	        if(count > 0) return "OK";
+	        return "ER";
+	    } finally {
+	        if (stmt != null)
+	            stmt.close();
+	        if (conn != null)
+	            conn.close();
+	    }
+	}
 
-         conn = conpool.get();
-         stmt = conn.prepareStatement(sql);
-         stmt.setInt(1, todoCode);
-         stmt.setInt(2, serverCode);
-         stmt.setString(3, userId);
-
-         int count = stmt.executeUpdate();
-         return count > 0;
-      } finally {
-         if (stmt != null)
-            stmt.close();
-         if (conn != null)
-            conn.close();
-      }
-   }
 
    public List<Map<String, Object>> getTodosByPostDateAndUser(int serverCode, String postDate, String userId) //선택된 날짜에 대한 TODO 다 가져오기
          throws SQLException {
