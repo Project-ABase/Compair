@@ -49,14 +49,15 @@ var Server = {
 
 	//서버가 바뀔때만 그 전에 화면 비움
 	serverClick: function(sc) {
+		//서버 바뀔때는 초기화
 		AllSession.maxSession(3);
 		AllSession.minSession(-1);
 		AllSession.serverSession(sc);
+		
 		$("#list").empty();
 		$("#todo-list-section").empty();
 		$("#todo-show-section").empty();
 		var nowScreen = AllSession.pageGet();
-		alert(nowScreen);	
 			if(nowScreen == 'board'){
 				Board.boardShow();
 			}

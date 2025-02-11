@@ -78,50 +78,18 @@ public class FeedDAO {
 			}
         }
     }
-    public String getList() throws NamingException, SQLException {
+	//sql문 수정
+	public String getGroup(String maxNo, String sc) throws NamingException, SQLException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            String sql = "SELECT jsonstr FROM feed ORDER BY BOARD_CODE DESC";
-
+        	String sql = "SELECT * FROM BOARDTABLE WHERE SERVER_CODE = ? ORDER BY BOARD_CODE DESC FETCH FIRST ? ROWS ONLY";
+        	
             conn = conpool.get();
             stmt = conn.prepareStatement(sql);
-            rs = stmt.executeQuery();
-                
-            String str = "[";
-            int cnt = 0;
-            while(rs.next()) {
-                if (cnt++ > 0) str += ", ";
-                str += rs.getString("jsonstr");
-            }
-            return str + "]";
-                
-        } finally {
-            if (rs != null) rs.close(); 
-            if (stmt != null) stmt.close(); 
-            if (conn != null) conn.close();
-        }
-    }
-    
-	public String getGroup(String maxNo, String sc, String good) throws NamingException, SQLException {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-        	if(good == null) good = "3";
-        	String sql = "SELECT * FROM BOARDTABLE";
-        	//변수로 변경
-        	if (maxNo != null) {
-        	    sql += " WHERE BOARD_CODE < " + maxNo + " AND SERVER_CODE = " + sc;
-        	}
-        	else if(maxNo == null) {
-        		sql += " WHERE SERVER_CODE = " + sc;
-        	}
-        	sql += " ORDER BY BOARD_CODE DESC FETCH FIRST " + good + "ROWS ONLY";
-
-            conn = conpool.get();
-            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, sc);
+            stmt.setString(2, maxNo);
             rs = stmt.executeQuery();
                 
             JSONArray jsonArray = new JSONArray();

@@ -4,14 +4,11 @@ var Board = {
 		Board.boardShow();
         });
     },
-	
+	//류재열 수정
 	boardShow: function() {
-	    var params = { "recentServerCode": AllSession.serverGet(), good:AllSession.maxGet()};
+	    var params = { "recentServerCode": AllSession.serverGet(), "maxNo": AllSession.maxGet()};
 	    AJAX.call("../JSP/feedGetGroup.jsp", params, function(data) {
 	        var feeds = JSON.parse(data.trim());
-	        if (feeds.length > 0) {
-	            AllSession.minSession(feeds[feeds.length - 1].BOARD_CODE);
-	        }
 	        Board.show(feeds);
 	    });
 	},
@@ -65,17 +62,14 @@ var Board = {
     },
 	
     getNext: function() {
-        var params = { maxNo: AllSession.minGet(), recentServerCode: AllSession.serverGet()};
-		console.log(AllSession.minGet());
+        var params = { maxNo: AllSession.maxGet(), recentServerCode: AllSession.serverGet()};
         AJAX.call("../JSP/feedGetGroup.jsp", params, function(data) {
             var feeds = JSON.parse(data.trim());
             if (feeds.length > 0) {
-				AllSession.minSession(feeds[feeds.length - 1].BOARD_CODE);
-            }
-			console.log(AllSession.minGet());
-			AllSession.maxSession(AllSession.maxGet() + 3);
-			console.log("허허허" + AllSession.maxGet());
-            Board.show(feeds);
+				AllSession.maxSession(AllSession.maxGet() + 3);
+				Board.show(feeds);
+			}
+			else alert("마지막 글입니다.");
         });
     }
 };
