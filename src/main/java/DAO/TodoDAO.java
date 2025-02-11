@@ -145,23 +145,20 @@ public class TodoDAO {
       }
    }
 
-   public String todoInsert(int serverCode, String todoTitle, String todoWriter, String postDate)
+   public String todoInsert(int serverCode, String todoTitle, String todoWriter, String postDate, String tagInput)
          throws SQLException {
       Connection conn = null;
       PreparedStatement stmtList = null;
       try {
          conn = conpool.get();
-         conn.setAutoCommit(false);
-         String tags = "testtags";
+         String tags = tagInput;
          
-         if (tags == null || tags.isEmpty()) {
+         if (tags == "") {
             tags = todoWriter;
-         } else {
-            tags = tags + "," + todoWriter;
          }
 
          // 1. todolist 삽입
-         String sqlList = "INSERT INTO TODOLIST (SERVER_CODE, TODO_TITLE, TODO_WRITER, TAG, TODO_CHECK, POST_DATE) VALUES(?, ?, ?, ?, 0, TO_DATE(?, 'YYYY-MM-DD'))";
+         String sqlList = "INSERT INTO TODOLIST (SERVER_CODE, TODO_CONTENT, TODO_WRITER, TAG, TODO_CHECK, POST_DATE) VALUES(?, ?, ?, ?, 0, TO_DATE(?, 'YYYY-MM-DD'))";
          stmtList = conn.prepareStatement(sqlList, new String[] { "TODO_CODE" });
          stmtList.setInt(1, serverCode);
          stmtList.setString(2, todoTitle);
@@ -170,15 +167,8 @@ public class TodoDAO {
          stmtList.setString(5, postDate);
 
          int listCount = stmtList.executeUpdate();
-         if (listCount != 1)
-            return "ER";
-
-         conn.commit();
-         return "OK";
-      } catch (SQLException e) {
-         if (conn != null)
-            conn.rollback();
-         throw e;
+         if (listCount != 1) return "ER";
+         else return "OK";
       } finally {
          if (stmtList != null)
             stmtList.close();
@@ -243,11 +233,10 @@ public class TodoDAO {
            while (rs.next()) {
                JSONObject obj = new JSONObject();
                obj.put("TODO_CODE", rs.getString("TODO_CODE"));
-               obj.put("SERVER_CODE", rs.getString("SERVER_CODE"));
-               obj.put("TODO_TITLE", rs.getString("TODO_TITLE"));
                obj.put("TODO_WRITER", rs.getString("TODO_WRITER"));
                obj.put("TODO_CHECK", rs.getString("TODO_CHECK"));
                obj.put("TODO_CONTENT", rs.getString("TODO_CONTENT"));
+               obj.put("TODO_TAGS", rs.getString("TAG"));
                jsonArray.add(obj);
            }
            System.out.println(jsonArray.toString());

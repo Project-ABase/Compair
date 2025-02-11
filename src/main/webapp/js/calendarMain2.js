@@ -33,13 +33,13 @@
 	
 	// todoPlus: To-Do 입력 필드의 값을 읽어와 후속 작업 수행
 	todoPlus: function(){
-		//const tagValues = tagify.value; //tag 값 저장 변수
-		//const tags = tagValues.map((item) => item.value); //tag를 저장
+		var tagValues = tagify.value; //tag 값 저장 변수
+		var tags = tagValues.map((item) => item.value); //tag를 저장
 		//추가 기능에 tag도 추가해야함.
-		//var tagInput = document.getElementById("todo-tag-input");
-		
-		
+		var tagInput = document.getElementById("todo-tag-input");
 	    var todoInput = document.getElementById("todo-input");
+		var tagparams = tags.join(" ");
+		alert(tagparams);
 	    if (todoInput) {
 	        var todoValue = todoInput.value.trim();
 
@@ -51,7 +51,7 @@
 				alert("서버를 선택해주세요");
 				return;
 			}
-	        var todoParams = {"ServerCode":AllSession.serverGet(), "todoInput": todoValue, "thisPageDate": AllSession.dateGet()};
+	        var todoParams = {"tagInput":tagparams, "ServerCode":AllSession.serverGet(), "todoInput": todoValue, "thisPageDate": AllSession.dateGet()};
 	        
 			AJAX.call("../JSP/todoInsert.jsp", todoParams, function(data) {
 	            if (data.trim() === "OK") {
@@ -70,20 +70,15 @@
 	    var clickCode = feed.TODO_CODE; // To-Do의 고유 식별자
 	    var content = feed.TODO_CONTENT; // 할 일 내용
 	    var writer = feed.TODO_WRITER; // 작성자
-	    var isDone = feed.IS_DONE ? "done" : ""; //추가 필요
+		var tag = feed.TODO_TAGS;
+	    var isDone = feed.CHECK; //추가 필요
 
-	    var str = `<div class="todo-item ${isDone} " id="todo-${clickCode}">`;
-	    str += `<span class="todo-writer" id="todo-writer-${clickCode}">[${writer}]</span> `;
-	    str += `<span class="todo-text" id="todo-text-${clickCode}" onclick="toggleExpand(${clickCode})">${content}</span>`;
-
-	    //태그 추가 칸 추가
-	    if (feed.TODO_TAGS && feed.TODO_TAGS.length > 0) {
-	        let tagsHTML = feed.TODO_TAGS //추가 필요
-	            .map(tag => `<span class="tag">${tag}</span>`)
-	            .join(" ");
-	        str += `<div class="todo-tags">${tagsHTML}</div>`;
-	    }
-
+	    var str = `<div class="todo-item ${isDone}" id="todo-${clickCode}">`;
+	   	str += `<span class="todo-writer" id="todo-writer-${clickCode}">[${writer}]</span>`;
+		str += `<span class="todo-text" id="todo-text-${clickCode}" onclick="toggleExpand(${clickCode})">${content}</span>`;
+		str += `<div class="todo-tags">${tag}</div>`;
+		    // 태그가 있는 경우 태그 출력
+		
 	    //버튼 추가
 	    str += `<div>`;
 	    str += `<button onclick="toggleTodo(${clickCode})"><i class="fa-solid ${isDone ? 'fa-rotate-left' : 'fa-check'}"></i></button>`;

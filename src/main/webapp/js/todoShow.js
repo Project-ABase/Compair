@@ -33,7 +33,7 @@ var Todo = {
 	
 	showTodoNothing: function() {
 		var calStr = "할 일이 없습니다.";
-	    $("#list").append(calStr);
+	    $("#todo-show-section").append(calStr);
 	},
 	
 	getFeedCode: function(feeds) {
