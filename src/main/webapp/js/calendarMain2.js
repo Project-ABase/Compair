@@ -71,8 +71,8 @@
 	    var content = feed.TODO_CONTENT; // 할 일 내용
 	    var writer = feed.TODO_WRITER; // 작성자
 		var tag = feed.TODO_TAGS;
-	    var isDone = feed.CHECK; //추가 필요
-
+	    var isDone; //추가 필요
+		if(feed.CHECK == 1) isDone = true;
 	    var str = `<div class="todo-item ${isDone}" id="todo-${clickCode}">`;
 	   	str += `<span class="todo-writer" id="todo-writer-${clickCode}">[${writer}]</span>`;
 		str += `<span class="todo-text" id="todo-text-${clickCode}" onclick="toggleExpand(${clickCode})">${content}</span>`;
@@ -81,29 +81,67 @@
 		
 	    //버튼 추가
 	    str += `<div>`;
-	    str += `<button onclick="toggleTodo(${clickCode})"><i class="fa-solid ${isDone ? 'fa-rotate-left' : 'fa-check'}"></i></button>`;
-	    str += `<button onclick="editTodo(${clickCode})"><i class="fa-solid fa-pen"></i></button>`;
-	    str += `<button onclick="deleteTodo(${clickCode})"><i class="fa-solid fa-trash-can"></i></button>`;
+	    str += `<button onclick="Calendar.toggleTodo(${clickCode})"><i class="fa-solid ${isDone ? 'fa-rotate-left' : 'fa-check'}"></i></button>`;
+	    str += `<button onclick="Calendar.editTodo(${clickCode})"><i class="fa-solid fa-pen"></i></button>`;
+	    str += `<button onclick="Calendar.deleteTodo(${clickCode})"><i class="fa-solid fa-trash-can"></i></button>`;
 	    str += `</div>`;
 	    str += `</div>`; // todo-item 닫기
 
 	    return str;
 	},
 	
+	toggleTodo: function(id) {
+	    // id를 이용해 해당 할 일 항목의 최상위 div 요소를 가져옵니다.
+	    var todoItem = document.getElementById("todo-" + id);
+	    if (!todoItem) return; // 요소가 없으면 종료
+
+	    // 현재 완료 상태는 "done" 클래스의 존재 여부로 판단합니다.
+	    var isDone = todoItem.classList.contains("done");
+	    
+	    // 관련된 텍스트 요소를 가져옵니다.
+	    var textSpan = document.getElementById("todo-text-" + id);
+	    // 토글 버튼의 아이콘 요소를 찾습니다.
+	    var toggleButtonIcon = todoItem.querySelector("button:first-child i");
+	    
+	    if (isDone) {
+	        // 현재 완료 상태라면 → 미완료 상태로 변경
+	        todoItem.classList.remove("done");
+	        // 미완료 상태일 때는 밑줄 효과 적용 (feed.TODO_CHECK가 0인 경우)
+	        if (textSpan) {
+	            textSpan.classList.add("underline");
+	        }
+	        // 토글 아이콘도 변경 (미완료이면 체크 아이콘)
+	        if (toggleButtonIcon) {
+	            toggleButtonIcon.classList.remove("fa-rotate-left");
+	            toggleButtonIcon.classList.add("fa-check");
+	        }
+	    } else {
+	        // 현재 미완료 상태라면 → 완료 상태로 변경
+	        todoItem.classList.add("done");
+	        // 완료 상태일 때는 밑줄 제거
+	        if (textSpan) {
+	            textSpan.classList.remove("underline");
+	        }
+	        // 토글 아이콘도 변경 (완료이면 복구 아이콘)
+	        if (toggleButtonIcon) {
+	            toggleButtonIcon.classList.remove("fa-check");
+	            toggleButtonIcon.classList.add("fa-rotate-left");
+	        }
+	    }
+		
+	},
+
+	
+	deleteTodo:function(id) {
+	  todoList = todoList.filter((todo) => todo.id !== id);
+	  renderTodoList();
+	}
 	/*
 	// 완료 상태 토글 함수
-	    function toggleTodo(id) {
-	      todoList = todoList.map((todo) =>
-	        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
-	      );
-	      renderTodoList();
-	    }
+
 
 	    // 할 일 삭제 함수
-	    function deleteTodo(id) {
-	      todoList = todoList.filter((todo) => todo.id !== id);
-	      renderTodoList();
-	    }
+
 
 	    function editTodo(id) {
 	      const todoItem = todoList.find((todo) => todo.id === id);
