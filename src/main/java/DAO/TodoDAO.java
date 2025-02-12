@@ -145,37 +145,49 @@ public class TodoDAO {
       }
    }
 
-   public String todoInsert(int serverCode, String todoTitle, String todoWriter, String postDate, String tagInput)
-         throws SQLException {
-      Connection conn = null;
-      PreparedStatement stmtList = null;
-      try {
-         conn = conpool.get();
-         String tags = tagInput;
-         
-         if (tags == "") {
+
+
+public String todoInsert(int serverCode, String todoTitle, String todoWriter, String tags, String postDate) throws SQLException {
+    Connection conn = null;
+    PreparedStatement stmtList = null;
+    try {
+        conn = conpool.get();
+        conn.setAutoCommit(false);
+
+        if (tags == null || tags.isEmpty()) {
             tags = todoWriter;
-         }
+        } else {
+            tags = tags + "," + todoWriter;
+        }
 
-         // 1. todolist 삽입
-         String sqlList = "INSERT INTO TODOLIST (SERVER_CODE, TODO_CONTENT, TODO_WRITER, TAG, TODO_CHECK, POST_DATE) VALUES(?, ?, ?, ?, 0, TO_DATE(?, 'YYYY-MM-DD'))";
-         stmtList = conn.prepareStatement(sqlList, new String[] { "TODO_CODE" });
-         stmtList.setInt(1, serverCode);
-         stmtList.setString(2, todoTitle);
-         stmtList.setString(3, todoWriter);
-         stmtList.setString(4, tags);
-         stmtList.setString(5, postDate);
+        // 1. todolist 삽입
+        String sqlList = "INSERT INTO TODOLIST (SERVER_CODE, TODO_TITLE, TODO_WRITER, TAG, TODO_CHECK, POST_DATE) VALUES(?, ?, ?, ?, 0, TO_DATE(?, 'YYYY-MM-DD'))";
+        stmtList = conn.prepareStatement(sqlList, new String[] { "TODO_CODE" });
+        stmtList.setInt(1, serverCode);
+        stmtList.setString(2, todoTitle);
+        stmtList.setString(3, todoWriter);
+        stmtList.setString(4, tags);
+        stmtList.setString(5, postDate);
 
-         int listCount = stmtList.executeUpdate();
-         if (listCount != 1) return "ER";
-         else return "OK";
-      } finally {
-         if (stmtList != null)
+        int listCount = stmtList.executeUpdate();
+        if (listCount != 1)
+            return "ER";
+
+        conn.commit();
+        return "OK";
+    } catch (SQLException e) {
+        if (conn != null)
+            conn.rollback();
+        throw e;
+    } finally {
+        if (stmtList != null)
             stmtList.close();
-         if (conn != null)
+        if (conn != null)
             conn.close();
-      }
-   }
+    }
+}
+
+
 
    public List<Map<String, Object>> todoGetgroup(int serverCode, String userId) throws SQLException { //태그된 Todo 다 출력 -> 짜피 getTodosByPostDateAndUser쓸거라 필요없을듯
       Connection conn = null;
@@ -233,11 +245,11 @@ public class TodoDAO {
            while (rs.next()) {
                JSONObject obj = new JSONObject();
                obj.put("TODO_CODE", rs.getString("TODO_CODE"));
+               obj.put("SERVER_CODE", rs.getString("SERVER_CODE"));
+               obj.put("TODO_TITLE", rs.getString("TODO_TITLE"));
                obj.put("TODO_WRITER", rs.getString("TODO_WRITER"));
                obj.put("TODO_CHECK", rs.getString("TODO_CHECK"));
                obj.put("TODO_CONTENT", rs.getString("TODO_CONTENT"));
-               obj.put("TODO_TAGS", rs.getString("TAG"));
-               obj.put("TODO_CHECK", rs.getString("TODO_CHECK"));
                jsonArray.add(obj);
            }
            System.out.println(jsonArray.toString());
@@ -250,40 +262,28 @@ public class TodoDAO {
    }
    
    
-   public String todoCheck(String todoCode, String serverCode, String userId) throws SQLException {
-	    Connection conn = null;
-	    PreparedStatement stmt = null;
-	    try {
-	        // 작성자이거나 TAG에 userId가 포함되어 있으면 업데이트(체크 토글)한다.
-	    	String sql = "UPDATE TODOLIST SET TODO_CHECK = 1 - TODO_CHECK ";
-	               sql += "WHERE TODO_CODE = ? AND SERVER_CODE = 1 ";
-	               sql +=  "AND (TODO_WRITER = ? OR INSTR(TAG, ?) > 0)";
-	        int tc = Integer.parseInt(todoCode);
-	        int sc = Integer.parseInt(serverCode);
-	        System.out.println("TodoDao");
-	        System.out.println(todoCode);
-	        System.out.println(serverCode);
-	        System.out.println(userId);
-	        conn = conpool.get();
-	        stmt = conn.prepareStatement(sql);
-	        stmt.setInt(1, tc);
-	        //stmt.setInt(1, sc);
-	        stmt.setString(2, userId);  // 작성자인 경우
-	        stmt.setString(3, userId);  // TAG에 userId가 포함되어 있는지 검사
-	        System.out.println(userId);
-	        System.out.println("Executing SQL: " + sql);
-	        int count = stmt.executeUpdate();
-	        System.out.println("count는 "+ count);
-	        if(count > 0) return "OK";
-	        return "ER";
-	    } finally {
-	        if (stmt != null)
-	            stmt.close();
-	        if (conn != null)
-	            conn.close();
-	    }
-	}
+   public boolean todoCheck(int todoCode, int serverCode, String userId) throws SQLException {
+      Connection conn = null;
+      PreparedStatement stmt = null;
+      try {
+         String sql = "UPDATE TODOLIST SET TODO_CHECK = 1 - TODO_CHECK " + "WHERE TODO_CODE = ? AND SERVER_CODE = ? "
+               + "AND INSTR(TAG, ?) > 0"; // 태그된 사용자만 체크 가능
 
+         conn = conpool.get();
+         stmt = conn.prepareStatement(sql);
+         stmt.setInt(1, todoCode);
+         stmt.setInt(2, serverCode);
+         stmt.setString(3, userId);
+
+         int count = stmt.executeUpdate();
+         return count > 0;
+      } finally {
+         if (stmt != null)
+            stmt.close();
+         if (conn != null)
+            conn.close();
+      }
+   }
 
    public List<Map<String, Object>> getTodosByPostDateAndUser(int serverCode, String postDate, String userId) //선택된 날짜에 대한 TODO 다 가져오기
          throws SQLException {
@@ -330,4 +330,26 @@ public class TodoDAO {
             conn.close();
       }
    }
+   
+   public boolean isAuthor(int todoCode, String userId) throws SQLException {
+	    Connection conn = null;
+	    PreparedStatement stmt = null;
+	    ResultSet rs = null;
+	    try {
+	        String sql = "SELECT TODO_WRITER FROM TODOLIST WHERE TODO_CODE = ?";
+	        conn = conpool.get();
+	        stmt = conn.prepareStatement(sql);
+	        stmt.setInt(1, todoCode);
+	        rs = stmt.executeQuery();
+	        if (rs.next()) {
+	            String writer = rs.getString("TODO_WRITER");
+	            return writer.equals(userId);
+	        }
+	        return false;
+	    } finally {
+	        if (rs != null) rs.close();
+	        if (stmt != null) stmt.close();
+	        if (conn != null) conn.close();
+	    }
+	}
 }
