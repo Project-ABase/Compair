@@ -153,13 +153,15 @@ public String todoInsert(int serverCode, String todoTitle, String todoWriter, St
     try {
         conn = conpool.get();
         conn.setAutoCommit(false);
-
-        if (tags == null || tags.isEmpty()) {
-            tags = todoWriter;
-        } else {
+//        if (tags == "" || tags.isEmpty()) {
+//            tags = todoWriter;
+//        } 
+        if(tags != todoWriter) {
             tags = tags + "," + todoWriter;
         }
-
+        else if(tags == todoWriter){
+        	tags = todoWriter;
+        }
         // 1. todolist 삽입
         String sqlList = "INSERT INTO TODOLIST (SERVER_CODE, TODO_TITLE, TODO_WRITER, TAG, TODO_CHECK, POST_DATE) VALUES(?, ?, ?, ?, 0, TO_DATE(?, 'YYYY-MM-DD'))";
         stmtList = conn.prepareStatement(sqlList, new String[] { "TODO_CODE" });
@@ -295,7 +297,7 @@ public String todoInsert(int serverCode, String todoTitle, String todoWriter, St
       try {
          // SQL: 날짜(년-월-일) 일치 항목 조회 및 태그에 사용자 ID 포함
          String sql = "SELECT * FROM TODOLIST " + "WHERE SERVER_CODE = ? AND TO_CHAR(POST_DATE, 'YYYY-MM-DD') = ? "
-               + "AND INSTR(TAG, ?) > 0";
+               + "AND INSTR(TAG, ?) > 0 ORDER BY TODO_CODE DESC";
 
          conn = conpool.get();
          stmt = conn.prepareStatement(sql);
