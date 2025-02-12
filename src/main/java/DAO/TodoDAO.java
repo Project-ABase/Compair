@@ -256,7 +256,7 @@ public class TodoDAO {
 	    try {
 	        // 작성자이거나 TAG에 userId가 포함되어 있으면 업데이트(체크 토글)한다.
 	    	String sql = "UPDATE TODOLIST SET TODO_CHECK = 1 - TODO_CHECK ";
-	               sql += "WHERE TODO_CODE = ? AND SERVER_CODE = ? ";
+	               sql += "WHERE TODO_CODE = ? AND SERVER_CODE = 1 ";
 	               sql +=  "AND (TODO_WRITER = ? OR INSTR(TAG, ?) > 0)";
 	        int tc = Integer.parseInt(todoCode);
 	        int sc = Integer.parseInt(serverCode);
@@ -267,9 +267,9 @@ public class TodoDAO {
 	        conn = conpool.get();
 	        stmt = conn.prepareStatement(sql);
 	        stmt.setInt(1, tc);
-	        stmt.setInt(2, sc);
-	        stmt.setString(3, userId);  // 작성자인 경우
-	        stmt.setString(4, userId);  // TAG에 userId가 포함되어 있는지 검사
+	        //stmt.setInt(1, sc);
+	        stmt.setString(2, userId);  // 작성자인 경우
+	        stmt.setString(3, userId);  // TAG에 userId가 포함되어 있는지 검사
 	        System.out.println(userId);
 	        System.out.println("Executing SQL: " + sql);
 	        int count = stmt.executeUpdate();
